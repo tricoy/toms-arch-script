@@ -50,8 +50,9 @@ fi
 timedatectl set-ntp true
 
 # Configure the fastest mirrors
-pacman -Sy --noconfirm reflector
-reflector --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+pacman -Sy --noconfirm reflector rsync
+cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+reflector --country Brazil --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 pacman -Syy
 
 # Partition the disk
@@ -89,9 +90,7 @@ mount -o noatime,compress=zstd,subvol=@snapshots /dev/mapper/cryptroot /mnt/.sna
 mount "${EFI_PARTITION}" /mnt/boot
 
 # Install essential packages
-ESSENTIAL_PACKAGES="base linux linux-lts linux-firmware util-linux sudo btrfs-progs intel-ucode intel-media-driver nvidia nvidia-lts nvidia-utils nvidia-settings tpm2-tools clevis lvm2 grub grub-efi-x86_64 efibootmgr zram-generator"
-
-pacstrap /mnt "${ESSENTIAL_PACKAGES}"
+pacstrap /mnt base linux linux-lts linux-firmware util-linux sudo btrfs-progs intel-ucode intel-media-driver nvidia nvidia-lts nvidia-utils nvidia-settings tpm2-tools clevis lvm2 grub grub-efi-x86_64 efibootmgr zram-generator
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -120,7 +119,7 @@ EOT
 
 # Initramfs
 cat <<EOT > /etc/mkinitcpio.conf
-MODULES=(btrfs tpm2)
+MODULES=(btrfs tpm)
 BINARIES=()
 FILES=()
 HOOKS=(base udev autodetect modconf block encrypt filesystems)
@@ -136,8 +135,7 @@ echo "${USER_NAME}:${USER_PASSWORD}" | chpasswd
 echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 
 # Install additional packages
-ADDITIONAL_PACKAGES="networkmanager network-manager-applet dialog wpa_supplicant mtools dosfstools reflector base-devel linux-headers avahi xdg-user-dirs xdg-utils gvfs gvfs-smb nfs-utils inetutils dnsutils bluez bluez-utils alsa-utils pipewire pipewire-alsa pipewire-pulse pipewire-jack bash-completion openssh timeshift rsync acpi acpi_call tlp dnsmasq ipset ufw flatpak sof-firmware nss-mdns acpid os-prober ntfs-3g wget git gcc neovim btop hyprland xdg-desktop-portal xdg-desktop-portal-hyprland kitty polkit-kde-agent qt5-wayland qt6-wayland rofi-wayland firefox vlc obs-studio grim slurp obsidian"
-pacman -S --noconfirm $ADDITIONAL_PACKAGES
+pacman -S --noconfirm networkmanager network-manager-applet dialog wpa_supplicant mtools dosfstools reflector base-devel linux-headers avahi xdg-user-dirs xdg-utils gvfs gvfs-smb nfs-utils inetutils dnsutils bluez bluez-utils alsa-utils pipewire pipewire-alsa pipewire-pulse pipewire-jack bash-completion openssh timeshift rsync acpi acpi_call tlp dnsmasq ipset ufw flatpak sof-firmware nss-mdns acpid os-prober ntfs-3g wget git gcc neovim btop hyprland xdg-desktop-portal xdg-desktop-portal-hyprland kitty polkit-kde-agent qt5-wayland qt6-wayland rofi-wayland firefox vlc obs-studio grim slurp obsidian
 
 # Enable services
 systemctl enable NetworkManager bluetooth systemd-timesyncd avahi-daemon tlp reflector.timer fstrim.timer ufw acpid
