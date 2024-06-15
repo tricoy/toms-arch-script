@@ -89,9 +89,9 @@ mount -o noatime,compress=zstd,subvol=@snapshots /dev/mapper/cryptroot /mnt/.sna
 mount "${EFI_PARTITION}" /mnt/boot
 
 # Install essential packages
-ESSENTIAL_PACKAGES="base linux linux-lts linux-firmware util-linux sudo btrfs-progs intel-ucode intel-media-driver nvidia nvidia-lts nvidia-utils nvidia-settings tpm2-tools clevis lvm2 grub grub-efi-x86_64 efibootmgr zramswap"
+ESSENTIAL_PACKAGES="base linux linux-lts linux-firmware util-linux sudo btrfs-progs intel-ucode intel-media-driver nvidia nvidia-lts nvidia-utils nvidia-settings tpm2-tools clevis lvm2 grub grub-efi-x86_64 efibootmgr zram-generator"
 
-pacstrap /mnt "$ESSENTIAL_PACKAGES"
+pacstrap /mnt "${ESSENTIAL_PACKAGES}"
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
